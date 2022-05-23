@@ -19,12 +19,14 @@ async function run() {
         await client.connect()
         const servicesCollection = client.db('dental_cares').collection('services');
         const bookingCollection = client.db('dental_cares').collection('bookings');
+        // get all services
         app.get('/services', async (req, res) => {
             const query = {}
             const cursor = servicesCollection.find(query);
             const services = await cursor.toArray();
             res.send(services)
         }),
+        // get available services
         app.get('/available', async (req, res) => {
             const date =  req.query.date;
             const services = await servicesCollection.find().toArray();
@@ -37,6 +39,14 @@ async function run() {
                 service.slots = available;
             })
             res.send(services)
+        })
+        
+        app.get('/booking', async (req, res)=>{
+            const patient = req.query.patient;
+            console.log(patient);
+            const query = {patient: patient};
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings)
         })
         app.post('/booking', async (req, res) => {
             const booking = req.body;
