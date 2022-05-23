@@ -25,17 +25,18 @@ async function run() {
             const services = await cursor.toArray();
             res.send(services)
         }),
-        app.get('available', async (req, res) => {
-            const date = req.query.date;
-            const services = await bookingCollection.find().toArray();
+        app.get('/available', async (req, res) => {
+            const date =  req.query.date;
+            const services = await servicesCollection.find().toArray();
             const query = { date: date };
             const bookings = await bookingCollection.find(query).toArray();
             services.forEach(service => {
                 const servicesBooking = bookings.filter(book=>book.treatment=== service.name);
-                const bookedSlot = servicesBooking.map(book=>book.slot)
-                service.slots = service.slots.filter(slot=>!bookedSlot.includes(slot));
-
+                const bookedSlots = servicesBooking.map(book=>book.slots)
+                const available = service.slots.filter(slot => !bookedSlots.includes(slot));
+                service.slots = available;
             })
+            res.send(services)
         })
         app.post('/booking', async (req, res) => {
             const booking = req.body;
